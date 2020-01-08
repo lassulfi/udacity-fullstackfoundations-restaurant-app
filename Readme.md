@@ -17,5 +17,5 @@ pip install SQLAlchemy
 or 
 
 ```
-pip install SQLAlchemy
+pip3 install SQLAlchemy
 ```
