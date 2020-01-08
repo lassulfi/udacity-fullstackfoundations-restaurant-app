@@ -4,7 +4,7 @@ Restaurant app project developed during the Course Full Stack Foundations at [Ud
 
 ### Prerequisites
 
-* python or python3
+* python2 or python3
 * pip package installer
 * [SQLAlchemy](https://www.sqlalchemy.org/)
 
