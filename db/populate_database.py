@@ -469,4 +469,4 @@ session.add(menuItem1)
 session.commit()
 
 #Check if the data was stored
-print('Added restaurants and menu items!')
+print 'Added restaurants and menu items!'
