@@ -1,6 +1,16 @@
 import cgi
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from database_setup import Base, Restaurant
+
+engine = create_engine('sqlite:///restaurant_menu.db')
+
+Base.metadata.bind = engine
+
+DBSession = sessionmaker(bind = engine)
+session = DBSession()
 
 class webserverHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -43,6 +53,21 @@ class webserverHandler(BaseHTTPRequestHandler):
                 self.wfile.write(output)
                 print output 
                 return
+            if self.path.endswith('/restaurants'):
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+
+                restaurants = session.query(Restaurant).all()   
+
+                output = ''
+                output += '<html><body>'
+                output += '<h1>Restaurants</h1>'
+                for restaurant in restaurants:
+                    output += '<h2> %s </h2>' % restaurant.name
+                output += '</body></html>'
+                self.wfile.write(output)
+                print output
         except IOError:
             self.send_error(404, 'File Not Found %s' % self.path)
 
