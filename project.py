@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem
@@ -22,11 +22,24 @@ def restaurants():
     
     return output
 
-@app.route('/restaurants/<int:restaurant_id>/')
+@app.route('/restaurants/<int:restaurant_id>/menu')
 def restaurantMenu(restaurant_id):
     myRestaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
     myMenuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
     return render_template('menu.html', restaurant=myRestaurant, items=myMenuItems)
+
+@app.route('/restaurants/<int:restaurant_id>/menu.json')
+def restaurantMenuJSON(restaurant_id):
+    myRestaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    myMenuItems = session.query(MenuItem).filter_by(restaurant_id = restaurant_id).all()
+    return jsonify(MenuItems=[i.serialize for i in myMenuItems])
+
+@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/menu_item.json')
+def restaurantMenuItemJSON(restaurant_id, menu_id):
+    myRestaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    if myRestaurant != []:
+        myMenuItem = session.query(MenuItem).filter_by(id = menu_id, restaurant_id = myRestaurant.id).one()
+        return jsonify(MenuItem = myMenuItem.serialize)
 
 # Task 1: Create route for newMenuItem function here
 
