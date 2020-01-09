@@ -1,4 +1,5 @@
 /__pycache__
-*.db
+/db/__pycache__
+*.db*
 
 /.vscode

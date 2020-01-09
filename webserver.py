@@ -66,7 +66,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 for restaurant in restaurants:
                     output +=  restaurant.name
                     output += ''' <a href='/restaurants/%s/edit'>Edit</a>''' % restaurant.id
-                    output += ''' <a href='#'>Delete</a>'''
+                    output += ''' <a href='/restaurants/%s/delete'>Delete</a>''' % restaurant.id
                     output += '</br>'
                 output += '</body></html>'
                 self.wfile.write(output)
@@ -99,6 +99,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                     self.end_headers()
 
                 output = ''
+                output += '<html><body>'
                 output += '<h3> %s </h3>' % myRestaurantQuery.name
                 output += '''
                     <form method='POST' enctype='multipart/form-data' action='/restaurants/{}/edit'>
@@ -106,6 +107,27 @@ class webserverHandler(BaseHTTPRequestHandler):
                         <input type='submit' value='Update'>
                     </form>
                 '''.format(myRestaurantQuery.id, myRestaurantQuery.name)
+                output += '</body></html>'
+                self.wfile.write(output)
+                print output
+                return
+            if self.path.endswith('/delete'):
+                restaurantIdPath = self.path.split('/')[2]
+                myRestaurantQuery = session.query(Restaurant).filter_by(id=restaurantIdPath).one()
+                if myRestaurantQuery != []:
+                    self.send_response(200)
+                    self.send_header('Content-type', 'text/html')           
+                    self.end_headers()     
+
+                output = ''
+                output += '<html><body>'
+                output += '<h1>Are you sure you want to delete %s </h1>' % myRestaurantQuery.name
+                output += '''
+                    <form method='POST' enctype='multipart/form-data' action='/restaurants/{}/delete'>
+                        <input type='submit' value='Delete'>
+                    </form>
+                '''.format(myRestaurantQuery.id)
+                output += '</body></html>'  
                 self.wfile.write(output)
                 print output
                 return
@@ -172,8 +194,22 @@ class webserverHandler(BaseHTTPRequestHandler):
                     self.send_header('Content-type', 'text/html')
                     self.send_header('Location', '/restaurants')
                     self.end_headers()
-
                     return
+            if self.path.endswith('/delete'):
+                ctype, pdict = cgi.parse_header(
+                    self.headers.getheader('content-type'))
+                if(ctype == 'multipart/form-data'):
+                    restaurantIdPath = self.path.split('/')[2]
+                    myRestaurantQuery = session.query(Restaurant).filter_by(id=restaurantIdPath).one()
+                    if myRestaurantQuery != []:
+                        session.delete(myRestaurantQuery)
+                        session.commit
+                    
+                    self.send_response(301)
+                    self.send_header('Content-type', 'text/html')
+                    self.send_header('Location', '/restaurants')
+                    self.end_headers()
+                return
         except:
             pass
 
