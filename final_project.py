@@ -29,7 +29,7 @@ def newRestaurant():
     else:
         return render_template('newrestaurant.html')
 
-@app.route('/restaurant/<int:restaurant_id>/edit/')
+@app.route('/restaurant/<int:restaurant_id>/edit/', methods=['GET', 'POST'])
 def editRestaurant(restaurant_id):
     editedRestaurant = restaurants[restaurant_id - 1]
     if request.method == 'POST':
@@ -39,7 +39,7 @@ def editRestaurant(restaurant_id):
     else:
         return render_template('editrestaurant.html', restaurant=editedRestaurant)
 
-@app.route('/restaurant/<int:restaurant_id>/delete/')
+@app.route('/restaurant/<int:restaurant_id>/delete/', methods=['GET', 'POST'])
 def deleteRestaurant(restaurant_id):
     deletedRestaurant = restaurants[restaurant_id - 1]
     if request.method == 'POST':
@@ -51,19 +51,70 @@ def deleteRestaurant(restaurant_id):
 @app.route('/restaurant/<int:restaurant_id>/')
 @app.route('/restaurant/<int:restaurant_id>/menu/')
 def showMenu(restaurant_id):
-    return 'This page is the menu for restaurant %s' % restaurant_id
+    restaurant = restaurants[restaurant_id - 1]
+    return render_template('menu.html', restaurant=restaurant, items=items)
 
-@app.route('/restaurant/<int:restaurant_id>/menu/new/')
+@app.route('/restaurant/<int:restaurant_id>/menu/new/', methods=['GET', 'POST'])
 def newMenuItem(restaurant_id):
-    return 'This page is for making a new item for restaurant %s' % restaurant_id
+    restaurant = restaurants[restaurant_id - 1]
+    if request.method == 'POST':
+        item = {}
+        item['id'] = len(items)
+        if request.form['name']:
+            item['name'] = request.form['name']
+        else:
+            item['name'] = ''
+        if request.form['description']:
+            item['description'] = request.form['description']
+        else:
+            item['descritpion'] = ''
+        if request.form['price']:
+            item['price'] = request.form['price']
+        else:
+            item['price'] = ''
+        item['course'] = request.form['course']
+        items.append(item)
+        return redirect(url_for('showMenu', restaurant_id=restaurant_id))
+    else:
+        return render_template('newmenuitem.html', restaurant_id=restaurant_id)
 
-@app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/edit/')
+@app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/edit/', methods=['GET', 'POST'])
 def editMenuItem(restaurant_id, menu_id):
-    return 'This page is for editing menu item %s' % menu_id
+    restaurant = restaurants[restaurant_id - 1]
+    item = items[menu_id - 1]
+    if item != []:
+        if request.method =='POST':
+            if request.form['name']:
+                item['name'] = request.form['name']
+            else:
+                item['name'] = ''
+            if request.form['description']:
+                item['description'] = request.form['description']
+            else:
+                item['descritpion'] = ''
+            if request.form['price']:
+                item['price'] = request.form['price']
+            else:
+                item['price'] = ''
+            item['course'] = request.form['course']
+            items.index(item.id - 1, item)
+            return redirect(url_for('showMenu', restaurant_id=restaurant_id))
+        else:
+            return render_template('editmenuitem.html', restaurant_id=restaurant_id, item=item)
 
-@app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/delete/')
+@app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/delete/', methods=['GET', 'POST'])
 def deleteMenuItem(restaurant_id, menu_id):
-    return 'This page is for deleting menu item %s' % menu_id
+    restaurant = restaurants[restaurant_id - 1]
+    try:
+        deletedItem = items[menu_id - 1]
+        if deletedItem != []:
+            if request.method == 'POST':
+                restaurants.remove(deletedItem)
+                return redirect(url_for('showMenu', restaurant_id=restaurant_id))
+            else:
+                return render_template('deletemenuitem.html', restaurant_id=restaurant_id, item=deletedItem)
+    except:
+        return render_template('menunotfound.html', restaurant_id=restaurant_id)
 
 if __name__ == '__main__':
     app.debug = True

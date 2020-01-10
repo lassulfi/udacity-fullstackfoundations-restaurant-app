@@ -1,0 +1,9 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+    <body>
+        <h1>Menu Item Not Found</h1>
+        <a href="{{url_for('showMenu', restaurant_id=restaurant_id)}}">Back</a>
+    </body>
+</html>
